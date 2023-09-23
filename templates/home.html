@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NL2SQL</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+</head>
+
+<body>
+  <div class="container" style="width: 66%;">
+    <div class="container text-center px-4 py-5">
+      <h1>Natural Language to SQL</h1><br>
+      <h4>Enter the Question and select a table to get SQL Query..</h4>
+      <form class="row" action="{{ url_for('query') }}" method="post" onsubmit="return validate()" >
+        <div class="col-12">
+          <div class="input-group flex-nowrap py-5">
+            <input id="question" name="question" type="text" class="form-control" placeholder="Enter Your Question Here!"
+              aria-label="Enter Your Question Here!" aria-describedby="addon-wrapping">
+          </div>
+        </div>
+        <div class="col-12 pb-5">
+          <select onchange="handleIdChange(this)" id="tableid" class="form-select" name="tableid" aria-label="Default select example">
+            <option selected id="st">Select a Table</option>
+            {% for table in table_data %}
+              <option value="{{table}}" >{{table_data[table]['table_name']}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+      <div class="col-12 py-3">
+        {% if session['message'] %}
+        {% block t %}
+          <h5 style='color:red;' >Enter Valid Question!</h5>
+        {% endblock t %}
+        {% endif %}
+        <div id="error">
+        </div>
+      </div>
+      <div id="table_header">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let headersDiv = document.getElementById("table_header");
+    let data = JSON.stringify({{ table_data | tojson }});
+    let selectId = document.getElementById("tableid");
+    function handleIdChange(table_object)
+    {
+      headersDiv.innerHTML = "";
+      jsonData = JSON.parse(data);
+      headers = jsonData[table_object.value]["header"];
+      table_rows = jsonData[table_object.value]["rows"];
+      new_table_rows = []
+
+      for(var i=0;i<5;i++)
+        new_table_rows.push(table_rows[i])
+
+      let text = "";
+      text += "<h3>The table is as below..</h3>";
+      text += '<table class="table"><thead><tr>';
+      headers.forEach(e => {
+        text += ('<th scope="col">'+e+'</th>');
+      });
+      text += ('</tr></thead><tbody>');
+
+      console.log(new_table_rows);  
+      new_table_rows.forEach(row => {
+        let x = '<tr>';
+        row.forEach(r => {
+          let y = "";
+          y = '<td>';
+          y += r;
+          y += '</td>';
+          x += y;
+        });
+        x += '</tr>';
+        text += x;
+      });
+
+      text += ('</tbody></table>');
+      headersDiv.innerHTML = text;
+      if(document.getElementById("error").innerHTML !== "")
+      document.getElementById("error").innerHTML = "";
+    }
+
+    function validate()
+    {
+      if((document.getElementById("question").value == "" || document.getElementById("st").selected == true)) 
+      {
+        document.getElementById("error").innerHTML = "<h5 style='color:red;' >Please select a table or enter a valid question..</h5>";
+        return false;
+      }
+      return true;
+    }
+
+  </script>
+
+  <script>
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
+    integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
+    integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

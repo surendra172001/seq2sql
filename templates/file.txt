@@ -1,0 +1,8 @@
+{% if sqlquery %}
+        {% block t %}
+        <div id="sql">
+          <h5>SQL Query - {{ sqlquery }}</h5>
+          <h5>Result - {{ result }}</h5>
+        </div>
+        {% endblock t %}
+        {% endif %}
